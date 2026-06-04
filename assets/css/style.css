@@ -1096,30 +1096,19 @@ figure.manifesto-img:hover img {
     bottom: clamp(80px, 12vh, 140px);
     width: clamp(110px, 11vw, 160px);
     height: clamp(110px, 11vw, 160px);
-    background: var(--cream);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 20px 60px rgba(45, 14, 11, 0.25);
     z-index: 3;
+    filter: drop-shadow(0 20px 40px rgba(45, 14, 11, 0.25));
 }
-.hero-badge svg {
+.hero-badge-img {
     width: 100%;
     height: 100%;
+    object-fit: contain;
+    display: block;
     animation: rotateSlow 25s linear infinite;
-}
-.hero-badge text {
-    font-size: 13.5px;
-    letter-spacing: 0.05em;
-    fill: var(--wine);
-    font-family: var(--font-sans);
-    font-weight: 500;
-}
-.hero-badge-mark {
-    position: absolute;
-    color: var(--wine);
-    font-size: 22px;
 }
 
 @media (max-width: 1024px) {
