@@ -191,6 +191,194 @@
         updatePillars();
     }
 
+    /* ---------- PROGRAM CAROUSEL DRAG ---------- */
+    const programCarousel = document.querySelector('.program-carousel');
+    const programTrack = document.querySelector('.program-track');
+
+    if (programCarousel && programTrack) {
+        const ANIMATION_DURATION = 50; // seconds — must match CSS keyframe duration
+
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let startTranslate = 0;
+        let directionLocked = false;
+        let isHorizontal = false;
+
+        const getTrackTranslate = () => {
+            const style = window.getComputedStyle(programTrack);
+            const matrix = new DOMMatrixReadOnly(style.transform === 'none' ? '' : style.transform);
+            return matrix.m41 || 0;
+        };
+
+        const getHalfWidth = () => programTrack.scrollWidth / 2;
+
+        const startDrag = (e) => {
+            const isTouch = e.type === 'touchstart';
+            const point = isTouch ? e.touches[0] : e;
+
+            isDragging = true;
+            directionLocked = false;
+            isHorizontal = false;
+            startX = point.clientX;
+            startY = point.clientY;
+            startTranslate = getTrackTranslate();
+
+            // Freeze current animation at this position
+            programTrack.style.animation = 'none';
+            programTrack.style.transform = `translateX(${startTranslate}px)`;
+            programCarousel.classList.add('dragging');
+        };
+
+        const moveDrag = (e) => {
+            if (!isDragging) return;
+            const isTouch = e.type === 'touchmove';
+            const point = isTouch ? e.touches[0] : e;
+            const dx = point.clientX - startX;
+            const dy = point.clientY - startY;
+
+            // Lock direction after small movement (avoid stealing vertical scroll on mobile)
+            if (!directionLocked) {
+                if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+                isHorizontal = Math.abs(dx) > Math.abs(dy);
+                directionLocked = true;
+                if (!isHorizontal) {
+                    // user is scrolling vertically — release the carousel
+                    endDrag();
+                    return;
+                }
+            }
+
+            if (isHorizontal && e.cancelable) e.preventDefault();
+
+            // Apply drag with seamless wrap-around
+            let next = startTranslate + dx;
+            const half = getHalfWidth();
+            if (half > 0) {
+                while (next > 0) next -= half;
+                while (next < -half) next += half;
+            }
+            programTrack.style.transform = `translateX(${next}px)`;
+        };
+
+        const endDrag = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            programCarousel.classList.remove('dragging');
+
+            // Resume CSS animation from the current visual position
+            const currentTranslate = getTrackTranslate();
+            const half = getHalfWidth();
+            if (half > 0) {
+                const progress = Math.min(0.999, Math.max(0, Math.abs(currentTranslate) / half));
+                const delay = -(progress * ANIMATION_DURATION);
+
+                programTrack.style.transform = '';
+                programTrack.style.animation = '';
+                // force reflow so animation restart picks up the delay cleanly
+                void programTrack.offsetWidth;
+                programTrack.style.animation = `programScroll ${ANIMATION_DURATION}s linear infinite`;
+                programTrack.style.animationDelay = `${delay}s`;
+            }
+        };
+
+        // Mouse
+        programCarousel.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', moveDrag);
+        window.addEventListener('mouseup', endDrag);
+        window.addEventListener('blur', endDrag);
+
+        // Touch
+        programCarousel.addEventListener('touchstart', startDrag, { passive: true });
+        window.addEventListener('touchmove', moveDrag, { passive: false });
+        window.addEventListener('touchend', endDrag);
+        window.addEventListener('touchcancel', endDrag);
+
+        // Avoid native HTML5 drag behavior on images / links
+        programCarousel.addEventListener('dragstart', (e) => e.preventDefault());
+    }
+
+    /* ---------- SPEAKERS CAROUSEL ---------- */
+    const speakersCarousel = document.querySelector('.speakers-carousel');
+    if (speakersCarousel) {
+        const slides = speakersCarousel.querySelectorAll('.speaker-slide');
+        const prevBtn = speakersCarousel.querySelector('.speakers-arrow.prev');
+        const nextBtn = speakersCarousel.querySelector('.speakers-arrow.next');
+        const counterEl = speakersCarousel.querySelector('.counter-current');
+        const progressEl = speakersCarousel.querySelector('.counter-progress span');
+        const dots = speakersCarousel.querySelectorAll('.speaker-dot');
+        const stage = speakersCarousel.querySelector('.speakers-stage');
+
+        let activeIdx = 0;
+        const total = slides.length;
+        let isTransitioning = false;
+
+        const goTo = (target) => {
+            if (isTransitioning) return;
+            const idx = ((target % total) + total) % total;
+            if (idx === activeIdx) return;
+            isTransitioning = true;
+            activeIdx = idx;
+
+            slides.forEach((s, i) => s.classList.toggle('is-active', i === activeIdx));
+            dots.forEach((d, i) => d.classList.toggle('is-active', i === activeIdx));
+
+            if (counterEl) counterEl.textContent = String(activeIdx + 1).padStart(2, '0');
+            if (progressEl) progressEl.style.transform = `translateX(${activeIdx * 100}%)`;
+
+            setTimeout(() => { isTransitioning = false; }, 600);
+        };
+
+        if (prevBtn) prevBtn.addEventListener('click', () => goTo(activeIdx - 1));
+        if (nextBtn) nextBtn.addEventListener('click', () => goTo(activeIdx + 1));
+
+        dots.forEach((dot, i) => {
+            dot.addEventListener('click', () => goTo(i));
+        });
+
+        // Keyboard arrows when carousel is in viewport
+        document.addEventListener('keydown', (e) => {
+            const rect = speakersCarousel.getBoundingClientRect();
+            const inView = rect.top < window.innerHeight * 0.8 && rect.bottom > window.innerHeight * 0.2;
+            if (!inView) return;
+            // ignore when typing in inputs
+            if (document.activeElement && /input|textarea|select/i.test(document.activeElement.tagName)) return;
+            if (e.key === 'ArrowLeft') goTo(activeIdx - 1);
+            if (e.key === 'ArrowRight') goTo(activeIdx + 1);
+        });
+
+        // Touch swipe on the stage
+        if (stage) {
+            let tStartX = 0, tStartY = 0;
+            let tLocked = false, tHorizontal = false;
+
+            stage.addEventListener('touchstart', (e) => {
+                tStartX = e.touches[0].clientX;
+                tStartY = e.touches[0].clientY;
+                tLocked = false;
+                tHorizontal = false;
+            }, { passive: true });
+
+            stage.addEventListener('touchmove', (e) => {
+                if (tLocked) return;
+                const dx = e.touches[0].clientX - tStartX;
+                const dy = e.touches[0].clientY - tStartY;
+                if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+                    tHorizontal = Math.abs(dx) > Math.abs(dy);
+                    tLocked = true;
+                }
+            }, { passive: true });
+
+            stage.addEventListener('touchend', (e) => {
+                if (!tHorizontal) return;
+                const dx = e.changedTouches[0].clientX - tStartX;
+                if (Math.abs(dx) > 50) {
+                    goTo(dx > 0 ? activeIdx - 1 : activeIdx + 1);
+                }
+            });
+        }
+    }
+
     /* ---------- COUNTERS ---------- */
     const counters = document.querySelectorAll('[data-count]');
     const counterObserver = new IntersectionObserver((entries) => {
