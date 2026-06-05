@@ -1251,7 +1251,7 @@ figure.manifesto-img:hover img {
     .hero-text { max-width: 100%; }
 }
 @media (max-width: 600px) {
-    .hero-meta { flex-wrap: wrap; gap: 20px 32px; }
+    .hero-meta { flex-wrap: wrap; gap: 20px 16px; }
 }
 
 /* ============================================
