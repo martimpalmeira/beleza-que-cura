@@ -70,6 +70,7 @@ a {
 button { font-family: inherit; cursor: pointer; border: none; background: none; }
 
 em { font-style: italic; font-family: var(--font-serif); font-weight: 400; }
+p em { font-size: 24px; line-height: 16px; }
 
 ::selection { background: var(--wine); color: var(--cream); }
 
@@ -1044,7 +1045,7 @@ figure.manifesto-img:hover img {
 @media (max-width: 1024px) {
     .hero {
         padding-top: 120px;
-        padding-bottom: 350px;
+        padding-bottom: 380px;
         align-items: flex-start;
         min-height: 100svh;
         background: var(--cream);
@@ -1186,7 +1187,7 @@ figure.manifesto-img:hover img {
     margin-bottom: 40px;
     opacity: 0.85;
 }
-.hero-sub em { color: var(--wine); font-weight: 500; }
+.hero-sub em { color: var(--wine); font-weight: 500; font-size: 24px; line-height: 16px;}
 
 .hero-cta {
     display: flex;
@@ -1212,6 +1213,7 @@ figure.manifesto-img:hover img {
     font-family: var(--font-display);
     font-size: clamp(18px, 1.5vw, 22px);
     color: var(--wine-deep);
+    font-weight: 700;
 }
 
 .hero-scroll {
@@ -1268,7 +1270,7 @@ figure.manifesto-img:hover img {
     gap: 60px;
     align-items: center;
     white-space: nowrap;
-    animation: marqueeScroll 35s linear infinite;
+    animation: marqueeScroll 25s linear infinite;
     font-family: var(--font-display);
     font-size: clamp(28px, 4vw, 48px);
     letter-spacing: 0.02em;
@@ -1279,6 +1281,13 @@ figure.manifesto-img:hover img {
 }
 @keyframes marqueeScroll {
     to { transform: translateX(-50%); }
+}
+
+@media (max-width: 600px) {
+    @keyframes marqueeScroll {
+    to { transform: translateX(-150%); }
+}
+    .marquee-track { animation: marqueeScroll 15s linear infinite;}
 }
 
 /* ============================================
