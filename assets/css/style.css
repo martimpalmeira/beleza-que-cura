@@ -2205,7 +2205,11 @@ figure.speaker-featured-img::after {
 .venue-card {
     width: 100%;
     height: 100%;
-    background: var(--wine);
+    background-color: var(--wine);
+    background-image: url('../img/imagem-balneario.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     border-radius: 8px;
     padding: 48px;
     display: flex;
@@ -2215,16 +2219,31 @@ figure.speaker-featured-img::after {
     position: relative;
     overflow: hidden;
     box-shadow: 0 30px 80px rgba(45, 14, 11, 0.3);
+    isolation: isolate;
 }
+/* Multi-layer overlay: keeps the photo visible, secures text contrast,
+   echoes the brand's wine + terracota glow */
 .venue-card::before {
     content: '';
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(circle at 30% 20%, rgba(172, 65, 52, 0.4), transparent 50%),
-        radial-gradient(circle at 70% 80%, rgba(45, 14, 11, 0.4), transparent 50%);
+        linear-gradient(180deg, rgba(45, 14, 11, 0.35) 0%, rgba(45, 14, 11, 0.85) 100%),
+        linear-gradient(135deg, rgba(123, 41, 43, 0.55) 0%, rgba(123, 41, 43, 0.25) 50%, rgba(45, 14, 11, 0.65) 100%);
+    z-index: 1;
 }
-.venue-card > * { position: relative; z-index: 1; }
+.venue-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 25% 15%, rgba(172, 65, 52, 0.45), transparent 55%),
+        radial-gradient(circle at 80% 85%, rgba(45, 14, 11, 0.55), transparent 50%);
+    mix-blend-mode: overlay;
+    z-index: 2;
+    pointer-events: none;
+}
+.venue-card > * { position: relative; z-index: 3; }
 
 .venue-date {
     display: flex;
@@ -2282,7 +2301,7 @@ figure.speaker-featured-img::after {
     height: 100px;
     opacity: .8;
     animation: rotateSlow 20s linear infinite;
-    z-index: 2;
+    z-index: 3;
 }
 .venue-stamp svg { width: 100%; height: 100%; }
 .venue-stamp text {
@@ -2965,6 +2984,42 @@ figure.speaker-featured-img::after {
     opacity: .5;
     flex-wrap: wrap;
 }
+
+.footer-credit {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(249, 236, 224, 0.08);
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cream-soft);
+    opacity: 0.55;
+    font-weight: 400;
+}
+.footer-credit a {
+    color: var(--terracotta-soft);
+    font-weight: 600;
+    text-decoration: none;
+    position: relative;
+    padding-bottom: 2px;
+    margin-left: 4px;
+    transition: color .3s var(--ease-soft);
+}
+.footer-credit a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0.4);
+    transform-origin: left;
+    transition: transform .4s var(--ease-out);
+}
+.footer-credit a:hover { color: var(--cream); }
+.footer-credit a:hover::after { transform: scaleX(1); }
 
 @media (max-width: 900px) {
     .footer-top { grid-template-columns: 1fr; }
