@@ -1885,6 +1885,39 @@ figure.speaker-featured-img::after {
     font-size: clamp(18px, 1.5vw, 24px);
 }
 
+/* Bonus line — practical demo info appended below the topic */
+.topic-bonus {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed rgba(123, 41, 43, 0.25);
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    color: var(--wine);
+    font-weight: 500;
+    line-height: 1.4;
+}
+.bonus-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: rgba(172, 65, 52, 0.15);
+    border: 1px solid rgba(172, 65, 52, 0.4);
+    color: var(--terracotta);
+    font-size: 11px;
+    animation: bonusPulse 3s ease-in-out infinite;
+}
+@keyframes bonusPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(172, 65, 52, 0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(172, 65, 52, 0); }
+}
+
 /* Speakers grid (other 5) */
 .speakers-grid {
     display: grid;
